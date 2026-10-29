@@ -1,0 +1,21 @@
+@model ErrorViewModel
+@{
+    ViewData["Title"] = "Error";
+}
+
+<div class="lb-card" style="padding: 2.5rem; text-align: center; margin: 2rem auto; max-width: 500px;">
+    <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">⚠️</div>
+    <h1 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem;">Something went wrong</h1>
+    <p style="color: var(--lb-muted); margin-bottom: 1.5rem;">
+        An unexpected error occurred while processing your request.
+    </p>
+
+    @if (Model?.ShowRequestId == true)
+    {
+        <p style="font-size: 0.8rem; color: var(--lb-muted);">
+            Request ID: <code>@Model.RequestId</code>
+        </p>
+    }
+
+    <a href="/" class="lb-btn lb-btn-primary">Return Home</a>
+</div>

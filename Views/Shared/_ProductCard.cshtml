@@ -1,0 +1,82 @@
+@using System.Globalization
+@using LocalBuzz.Services
+@model LocalBuzz.ViewModels.SearchResultItem
+
+@{
+    var inCulture = new CultureInfo("en-IN");
+    var priceFormatted = Model.Price.ToString("C0", inCulture);
+}
+
+<div class="lb-card">
+    <div class="lb-card-image-wrap">
+        <partial name="_ProductImage" model="(Model.ImagePath, Model.Category, Model.ProductName)" />
+        <div class="lb-card-badges">
+            @if (Model.IsLowestPrice)
+            {
+                <span class="lb-pill lb-pill-lowest">Lowest price</span>
+            }
+            else
+            {
+                <span></span>
+            }
+
+            @if (Model.IsAvailable)
+            {
+                <span class="lb-pill lb-pill-instock">In stock</span>
+            }
+            else
+            {
+                <span class="lb-pill lb-pill-outofstock">Out of stock</span>
+            }
+        </div>
+    </div>
+
+    <div class="lb-card-body">
+        <div class="lb-card-header-meta">
+            <span class="lb-card-brand">@(string.IsNullOrWhiteSpace(Model.Brand) ? Model.Category : Model.Brand)</span>
+            <span class="lb-card-price">@priceFormatted</span>
+        </div>
+
+        <h3 class="lb-card-title">@Model.ProductName</h3>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Description))
+        {
+            <div class="lb-card-desc">@Model.Description</div>
+        }
+
+        <div class="lb-card-shop-info">
+            <div class="lb-card-shop-name">
+                <partial name="_Icon" model="@("store")" />
+                <span>@Model.ShopName</span>
+            </div>
+            <div class="lb-card-location-row">
+                <span>
+                    @Model.Locality
+                    @if (Model.DistanceKm.HasValue)
+                    {
+                        <strong> · @GeoHelper.FormatDistance(Model.DistanceKm.Value)</strong>
+                    }
+                </span>
+
+                @if (Model.IsOpen)
+                {
+                    <span class="lb-pill lb-pill-open">Open</span>
+                }
+                else
+                {
+                    <span class="lb-pill lb-pill-closed">Closed</span>
+                }
+            </div>
+
+            <div class="lb-card-actions">
+                <a href="/Shops/@Model.ShopId" class="lb-btn lb-btn-secondary lb-btn-sm">
+                    View shop
+                </a>
+                <a href="@Model.DirectionsUrl" target="_blank" rel="noopener noreferrer" class="lb-btn lb-btn-accent lb-btn-sm">
+                    <partial name="_Icon" model="@("directions")" />
+                    <span>Directions</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

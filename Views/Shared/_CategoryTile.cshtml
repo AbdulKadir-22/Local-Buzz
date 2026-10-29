@@ -1,0 +1,14 @@
+@model LocalBuzz.Services.CategoryItem
+
+<a href="/Search?category=@Uri.EscapeDataString(Model.Name)" class="lb-category-tile">
+    <div class="lb-category-tile-image-box">
+        <img src="/images/categories/@(Model.Slug).jpg" 
+             alt="@Model.Name" 
+             class="lb-category-tile-img" 
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+        <div class="lb-category-tile-emoji" style="display:none;">
+            @Model.Emoji
+        </div>
+    </div>
+    <div class="lb-category-tile-label">@Model.Name</div>
+</a>

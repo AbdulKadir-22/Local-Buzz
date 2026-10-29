@@ -1,0 +1,86 @@
+@using LocalBuzz.Services
+@{
+    ViewData["Title"] = "Find Products in Local Shops";
+    var popularCategories = CategoryCatalog.Categories.Take(3).ToList();
+}
+
+<div class="lb-container-hero" style="margin-left:auto; margin-right:auto; padding-top: 1rem;">
+    <div class="lb-eyebrow">YOUR NEIGHBOURHOOD, DISCOVERED</div>
+    <h1 class="lb-hero-title">Good finds are closer than you think.</h1>
+    <p class="lb-hero-subtitle">Find products. Discover local shops. Shop closer to home.</p>
+
+    <!-- Search Card -->
+    <div class="lb-search-card">
+        <form action="/Search" method="get" class="js-search-form">
+            <input type="hidden" name="lat" class="js-lat-input" value="" />
+            <input type="hidden" name="lng" class="js-lng-input" value="" />
+
+            <div class="lb-search-input-row">
+                <span class="lb-search-icon">
+                    <partial name="_Icon" model="@("search")" />
+                </span>
+                <input type="text" 
+                       name="q" 
+                       class="lb-search-input" 
+                       placeholder="Search products, brands or shops…" 
+                       autocomplete="off" 
+                       autofocus />
+                <button type="button" class="lb-pin-btn js-pin-btn" title="Use my current location">
+                    <partial name="_Icon" model="@("pin")" />
+                </button>
+            </div>
+
+            <button type="submit" class="lb-btn-search">
+                <partial name="_Icon" model="@("search")" />
+                <span>Find products near me</span>
+            </button>
+        </form>
+
+        <!-- Quick Trending Suggestions -->
+        <div class="lb-search-suggestions">
+            <span class="lb-suggestion-label">Popular searches:</span>
+            <a href="/Search?q=wireless+mouse" class="lb-suggestion-chip">🖱️ Wireless Mouse</a>
+            <a href="/Search?q=running+shoes" class="lb-suggestion-chip">👟 Running Shoes</a>
+            <a href="/Search?q=face+wash" class="lb-suggestion-chip">🧴 Face Wash</a>
+            <a href="/Search?q=keyboard" class="lb-suggestion-chip">⌨️ USB Keyboard</a>
+        </div>
+    </div>
+
+    <!-- Popular Categories -->
+    <div class="lb-section-header">
+        <h2 class="lb-section-title">Popular categories</h2>
+        <a href="/Search" class="lb-explore-link">Explore all →</a>
+    </div>
+
+    <div class="lb-category-grid" style="grid-template-columns: repeat(3, 1fr);">
+        @foreach (var cat in popularCategories)
+        {
+            <partial name="_CategoryTile" model="cat" />
+        }
+    </div>
+
+    <!-- Value Proposition Features -->
+    <div class="lb-feature-strip">
+        <div class="lb-feature-item">
+            <div class="lb-feature-icon">🔍</div>
+            <div>
+                <div class="lb-feature-title">Real-Time Local Stock</div>
+                <div class="lb-feature-sub">Know what's on local shelves before stepping out of home.</div>
+            </div>
+        </div>
+        <div class="lb-feature-item">
+            <div class="lb-feature-icon">🏷️</div>
+            <div>
+                <div class="lb-feature-title">Compare Fair Prices</div>
+                <div class="lb-feature-sub">Spot the lowest local prices across shops at a glance.</div>
+            </div>
+        </div>
+        <div class="lb-feature-item">
+            <div class="lb-feature-icon">📍</div>
+            <div>
+                <div class="lb-feature-title">Instant Directions</div>
+                <div class="lb-feature-sub">One-tap Google Maps directions to the exact storefront.</div>
+            </div>
+        </div>
+    </div>
+</div>

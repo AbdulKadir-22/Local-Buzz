@@ -1,0 +1,47 @@
+@using LocalBuzz.Services
+@model LocalBuzz.ViewModels.ShopCardItem
+
+<div class="lb-card" style="margin-bottom: 12px;">
+    <div class="lb-card-body">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div>
+                <h3 class="lb-card-title" style="font-size:1.1rem; margin-bottom:4px;">
+                    <a href="/Shops/@Model.ShopId">@Model.Name</a>
+                </h3>
+                <div style="font-size:0.85rem; color:var(--lb-muted);">
+                    @Model.Locality, @Model.City
+                    @if (Model.DistanceKm.HasValue)
+                    {
+                        <strong> · @GeoHelper.FormatDistance(Model.DistanceKm.Value)</strong>
+                    }
+                </div>
+            </div>
+            <div>
+                @if (Model.IsOpen)
+                {
+                    <span class="lb-pill lb-pill-open">Open</span>
+                }
+                else
+                {
+                    <span class="lb-pill lb-pill-closed">Closed</span>
+                }
+            </div>
+        </div>
+
+        <div style="margin-top:10px; font-size:0.85rem; color:var(--lb-muted); display:flex; gap:16px; flex-wrap:wrap;">
+            <span><partial name="_Icon" model="@("clock")" /> @Model.HoursFormatted</span>
+            <span><partial name="_Icon" model="@("phone")" /> @Model.Phone</span>
+            <span>📦 @Model.ProductCount available products</span>
+        </div>
+
+        <div style="margin-top:12px; display:flex; gap:10px;">
+            <a href="/Shops/@Model.ShopId" class="lb-btn lb-btn-secondary lb-btn-sm">
+                View Catalogue
+            </a>
+            <a href="@Model.DirectionsUrl" target="_blank" rel="noopener noreferrer" class="lb-btn lb-btn-accent lb-btn-sm">
+                <partial name="_Icon" model="@("directions")" />
+                <span>Directions</span>
+            </a>
+        </div>
+    </div>
+</div>

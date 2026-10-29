@@ -1,0 +1,230 @@
+@using LocalBuzz.Services
+@model LocalBuzz.ViewModels.SearchViewModel
+@{
+    ViewData["Title"] = string.IsNullOrWhiteSpace(Model.Q) ? "Explore Local Products" : $"Search: {Model.Q}";
+    var hasCoords = Model.Lat.HasValue && Model.Lng.HasValue;
+    var hasActiveFilters = !string.IsNullOrWhiteSpace(Model.Category) || !string.IsNullOrWhiteSpace(Model.Locality) || Model.RadiusKm.HasValue || !string.IsNullOrWhiteSpace(Model.Q);
+}
+
+<div style="padding-top: 0.25rem;">
+    <!-- Compact Top Search Bar -->
+    <form action="/Search" method="get" class="lb-search-top-bar js-search-form">
+        <input type="hidden" name="lat" class="js-lat-input" value="@Model.Lat" />
+        <input type="hidden" name="lng" class="js-lng-input" value="@Model.Lng" />
+        @if (!string.IsNullOrWhiteSpace(Model.Category))
+        {
+            <input type="hidden" name="category" value="@Model.Category" />
+        }
+        @if (!string.IsNullOrWhiteSpace(Model.Locality))
+        {
+            <input type="hidden" name="locality" value="@Model.Locality" />
+        }
+        @if (Model.RadiusKm.HasValue)
+        {
+            <input type="hidden" name="radiusKm" value="@Model.RadiusKm" />
+        }
+        @if (!string.IsNullOrWhiteSpace(Model.Sort))
+        {
+            <input type="hidden" name="sort" value="@Model.Sort" />
+        }
+        @if (Model.InStock)
+        {
+            <input type="hidden" name="inStock" value="true" />
+        }
+
+        <div class="lb-search-inline-card">
+            <span class="lb-search-icon" style="color:var(--lb-muted);">
+                <partial name="_Icon" model="@("search")" />
+            </span>
+            <input type="text" 
+                   name="q" 
+                   value="@Model.Q" 
+                   class="lb-search-input" 
+                   placeholder="Search products, brands or shops…" 
+                   autocomplete="off" />
+            <button type="button" class="lb-pin-btn js-pin-btn" title="Use my current location">
+                <partial name="_Icon" model="@("pin")" />
+            </button>
+        </div>
+
+        <button type="submit" class="lb-btn lb-btn-primary" style="height:48px; min-width:120px;">
+            Search
+        </button>
+    </form>
+
+    <!-- Filters & Refinements Bar -->
+    <form action="/Search" method="get" class="lb-filter-bar">
+        <input type="hidden" name="q" value="@Model.Q" />
+        <input type="hidden" name="lat" class="js-lat-input" value="@Model.Lat" />
+        <input type="hidden" name="lng" class="js-lng-input" value="@Model.Lng" />
+
+        <!-- Category Dropdown -->
+        <div class="lb-filter-item">
+            <span class="lb-filter-label">Category:</span>
+            <select name="category" class="lb-select-custom" onchange="this.form.submit()">
+                <option value="">All Categories</option>
+                @foreach (var cat in CategoryCatalog.Categories)
+                {
+                    <option value="@cat.Name" selected="@(Model.Category == cat.Name)">
+                        @cat.Emoji @cat.Name
+                    </option>
+                }
+            </select>
+        </div>
+
+        <!-- Locality Dropdown -->
+        <div class="lb-filter-item">
+            <span class="lb-filter-label">Locality:</span>
+            <select name="locality" class="lb-select-custom" onchange="this.form.submit()">
+                <option value="">All Localities</option>
+                @foreach (var loc in Model.AvailableLocalities)
+                {
+                    <option value="@loc" selected="@(Model.Locality == loc)">📍 @loc</option>
+                }
+            </select>
+        </div>
+
+        <!-- Sort -->
+        <div class="lb-filter-item">
+            <span class="lb-filter-label">Sort:</span>
+            <select name="sort" class="lb-select-custom" onchange="this.form.submit()">
+                @if (hasCoords)
+                {
+                    <option value="nearest" selected="@(Model.Sort == "nearest")">📍 Nearest First</option>
+                }
+                <option value="price_asc" selected="@(Model.Sort == "price_asc")">₹ Price: Low to High</option>
+                <option value="price_desc" selected="@(Model.Sort == "price_desc")">₹ Price: High to Low</option>
+            </select>
+        </div>
+
+        <!-- Radius (only shown if coordinates available) -->
+        @if (hasCoords)
+        {
+            <div class="lb-filter-item">
+                <span class="lb-filter-label">Radius:</span>
+                <select name="radiusKm" class="lb-select-custom" onchange="this.form.submit()">
+                    <option value="" selected="@(!Model.RadiusKm.HasValue)">Any Distance</option>
+                    <option value="2" selected="@(Model.RadiusKm == 2)">Within 2 km</option>
+                    <option value="5" selected="@(Model.RadiusKm == 5)">Within 5 km</option>
+                    <option value="10" selected="@(Model.RadiusKm == 10)">Within 10 km</option>
+                    <option value="25" selected="@(Model.RadiusKm == 25)">Within 25 km</option>
+                </select>
+            </div>
+        }
+
+        <!-- In stock toggle -->
+        <div class="lb-filter-item" style="margin-left:auto;">
+            <label class="lb-checkbox-label" style="background:#faf8f3; padding:5px 10px; border-radius:var(--lb-radius-sm); border:1px solid var(--lb-hairline);">
+                <input type="checkbox" name="inStock" value="true" class="lb-checkbox" checked="@Model.InStock" onchange="this.form.submit()" />
+                <span>In stock only</span>
+            </label>
+        </div>
+    </form>
+
+    <!-- Results Header / Summary Row -->
+    <div class="lb-results-header">
+        <div>
+            @if (!string.IsNullOrWhiteSpace(Model.SummaryLine))
+            {
+                <div class="lb-results-count">@Model.SummaryLine</div>
+            }
+            else
+            {
+                <div class="lb-results-count">@Model.TotalResults items found</div>
+            }
+        </div>
+
+        @if (hasActiveFilters)
+        {
+            <a href="/Search" class="lb-clear-all-btn">
+                ✕ Clear filters
+            </a>
+        }
+    </div>
+
+    <!-- Matching Shops Strip (if query matches shop names) -->
+    @if (Model.MatchingShops.Count > 0)
+    {
+        <div style="margin-bottom: 2rem;">
+            <div class="lb-section-header" style="margin-bottom:0.75rem;">
+                <h3 class="lb-section-title" style="font-size:1.05rem;">🏪 Matching Local Stores</h3>
+            </div>
+            <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px;">
+                @foreach (var s in Model.MatchingShops)
+                {
+                    <partial name="_ShopCard" model="s" />
+                }
+            </div>
+        </div>
+    }
+
+    <!-- Products Grid -->
+    @if (Model.Products.Count > 0)
+    {
+        <div class="lb-product-grid">
+            @foreach (var p in Model.Products)
+            {
+                <partial name="_ProductCard" model="p" />
+            }
+        </div>
+
+        <!-- Pagination -->
+        @if (Model.TotalPages > 1)
+        {
+            <div style="display:flex; justify-content:center; align-items:center; gap:12px; margin-top:2.5rem;">
+                @if (Model.HasPreviousPage)
+                {
+                    <a href="@Url.Action("Search", new { 
+                        q = Model.Q, 
+                        category = Model.Category, 
+                        locality = Model.Locality, 
+                        lat = Model.Lat, 
+                        lng = Model.Lng, 
+                        radiusKm = Model.RadiusKm, 
+                        sort = Model.Sort, 
+                        inStock = Model.InStock, 
+                        page = Model.Page - 1 })" 
+                       class="lb-btn lb-btn-secondary lb-btn-sm">
+                        ← Previous
+                    </a>
+                }
+
+                <span style="font-size:0.9rem; font-weight:600; color:var(--lb-ink); background:#ece4d6; padding:4px 12px; border-radius:var(--lb-radius-pill);">
+                    Page @Model.Page of @Model.TotalPages
+                </span>
+
+                @if (Model.HasNextPage)
+                {
+                    <a href="@Url.Action("Search", new { 
+                        q = Model.Q, 
+                        category = Model.Category, 
+                        locality = Model.Locality, 
+                        lat = Model.Lat, 
+                        lng = Model.Lng, 
+                        radiusKm = Model.RadiusKm, 
+                        sort = Model.Sort, 
+                        inStock = Model.InStock, 
+                        page = Model.Page + 1 })" 
+                       class="lb-btn lb-btn-secondary lb-btn-sm">
+                        Next →
+                    </a>
+                }
+            </div>
+        }
+    }
+    else
+    {
+        <!-- Friendly Empty State -->
+        <div class="lb-card" style="padding: 3.5rem 1.5rem; text-align: center; margin: 2rem 0;">
+            <div style="font-size: 3.2rem; margin-bottom: 0.75rem;">🔍</div>
+            <h2 style="font-size: 1.4rem; font-weight: 700; margin-bottom: 0.5rem; color:var(--lb-ink);">No matching products in nearby shops</h2>
+            <p style="color: var(--lb-muted); max-width: 460px; margin: 0 auto 1.75rem auto; line-height: 1.5;">
+                We couldn't find items matching your criteria. Try adjusting your spelling, choosing a broader category, or clearing distance filters.
+            </p>
+            <div style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
+                <a href="/Search" class="lb-btn lb-btn-secondary">Clear all filters</a>
+                <a href="/Account/Register" class="lb-btn lb-btn-accent">Are you a shopkeeper? List your shop</a>
+            </div>
+        </div>
+    }
+</div>

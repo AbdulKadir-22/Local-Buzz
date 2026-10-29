@@ -1,0 +1,216 @@
+@using LocalBuzz.Services
+@model LocalBuzz.ViewModels.DashboardViewModel
+@{
+    ViewData["Title"] = "Shopkeeper Dashboard";
+}
+
+<div style="padding-top: 0.5rem;">
+    <!-- Welcome Header -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1.5rem; flex-wrap:wrap; gap:12px;">
+        <div>
+            <h1 style="font-size: 1.75rem; font-weight: 700; margin:0;">
+                Hello, @Model.OwnerName
+            </h1>
+            <p style="color:var(--lb-muted); margin:0.25rem 0 0 0; font-size:0.95rem;">
+                @(Model.HasShop ? $"Managing '{Model.Shop!.Name}' in {Model.Shop.Locality}, {Model.Shop.City}" : "Complete your shop profile to start listing products.")
+            </p>
+        </div>
+
+        @if (Model.HasShop)
+        {
+            <div style="display:flex; gap:10px; align-items:center;">
+                <form asp-action="TogglePublish" method="post" style="display:inline;">
+                    @if (Model.Shop!.IsPublished)
+                    {
+                        <button type="submit" class="lb-btn lb-btn-secondary lb-btn-sm" title="Click to hide from search">
+                            <span class="lb-pill lb-pill-published">Published</span> · Hide Shop
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="submit" class="lb-btn lb-btn-accent lb-btn-sm" title="Click to make visible to customers">
+                            <span class="lb-pill lb-pill-hidden">Hidden</span> · Publish Shop
+                        </button>
+                    }
+                </form>
+
+                <a href="/Shops/@Model.Shop!.Id" target="_blank" class="lb-btn lb-btn-secondary lb-btn-sm">
+                    View Public Page ↗
+                </a>
+            </div>
+        }
+    </div>
+
+    @if (!Model.HasShop)
+    {
+        <!-- Onboarding Notice -->
+        <div class="lb-card" style="padding: 1.5rem; background: #fffaf0; border-color: #eeddbb; margin-bottom: 2rem;">
+            <div style="display:flex; gap:14px; align-items:center;">
+                <span style="font-size: 2.2rem;">🏪</span>
+                <div>
+                    <h3 style="margin:0 0 4px 0; font-size:1.15rem; font-weight:700;">Set up your shop to appear in search</h3>
+                    <p style="margin:0; color:var(--lb-muted); font-size:0.9rem;">
+                        Fill in your store details below. Once saved, you can add products, set prices, and let local customers discover your store.
+                    </p>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Stats Tiles -->
+        <div class="lb-stat-grid">
+            <div class="lb-stat-tile">
+                <div class="lb-stat-number">@Model.TotalProducts</div>
+                <div class="lb-stat-label">Total Listed Products</div>
+            </div>
+            <div class="lb-stat-tile">
+                <div class="lb-stat-number" style="color:var(--lb-open-green);">@Model.AvailableProducts</div>
+                <div class="lb-stat-label">In Stock</div>
+            </div>
+            <div class="lb-stat-tile">
+                <div class="lb-stat-number" style="color:var(--lb-closed-red);">@Model.OutOfStockProducts</div>
+                <div class="lb-stat-label">Out of Stock</div>
+            </div>
+            <div class="lb-stat-tile">
+                <div class="lb-stat-number">@Model.CategoriesUsed</div>
+                <div class="lb-stat-label">Categories Used</div>
+            </div>
+        </div>
+
+        <!-- Quick actions -->
+        <div style="display:flex; gap:12px; margin-bottom:2rem; flex-wrap:wrap;">
+            <a href="/Products/Create" class="lb-btn lb-btn-accent">
+                + Add New Product
+            </a>
+            <a href="/Products" class="lb-btn lb-btn-primary">
+                📦 Manage Products (@Model.TotalProducts)
+            </a>
+        </div>
+    }
+
+    <!-- Shop Profile Form -->
+    <div class="lb-card" style="padding: 1.75rem;">
+        <h2 style="font-size: 1.25rem; font-weight:700; margin-top:0; margin-bottom:1.25rem;">
+            @(Model.HasShop ? "Edit Shop Profile" : "Create Your Shop Profile")
+        </h2>
+
+        <form asp-action="Save" method="post">
+            <input type="hidden" asp-for="ShopForm.Id" />
+            <div asp-validation-summary="ModelOnly" class="lb-alert lb-alert-error"></div>
+
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+                <!-- Name -->
+                <div class="lb-form-group">
+                    <label asp-for="ShopForm.Name" class="lb-label"></label>
+                    <input asp-for="ShopForm.Name" class="lb-input" placeholder="e.g. Navsari Digital Hub" required />
+                    <span asp-validation-for="ShopForm.Name" class="lb-input-error"></span>
+                </div>
+
+                <!-- Phone -->
+                <div class="lb-form-group">
+                    <label asp-for="ShopForm.Phone" class="lb-label"></label>
+                    <input asp-for="ShopForm.Phone" class="lb-input" placeholder="e.g. +91 98251 12345" required />
+                    <span asp-validation-for="ShopForm.Phone" class="lb-input-error"></span>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="lb-form-group">
+                <label asp-for="ShopForm.Description" class="lb-label"></label>
+                <textarea asp-for="ShopForm.Description" class="lb-textarea" rows="2" placeholder="Briefly describe what items or services you offer..."></textarea>
+                <span asp-validation-for="ShopForm.Description" class="lb-input-error"></span>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 2fr 1fr 1fr; gap: 16px;">
+                <!-- Address -->
+                <div class="lb-form-group">
+                    <label asp-for="ShopForm.Address" class="lb-label"></label>
+                    <input asp-for="ShopForm.Address" class="lb-input" placeholder="Shop #, Building name, Street" required />
+                    <span asp-validation-for="ShopForm.Address" class="lb-input-error"></span>
+                </div>
+
+                <!-- Locality -->
+                <div class="lb-form-group">
+                    <label asp-for="ShopForm.Locality" class="lb-label"></label>
+                    <input asp-for="ShopForm.Locality" class="lb-input" list="localities-list" placeholder="e.g. Station Road" required />
+                    <datalist id="localities-list">
+                        @foreach (var loc in Model.ExistingLocalities)
+                        {
+                            <option value="@loc"></option>
+                        }
+                    </datalist>
+                    <span asp-validation-for="ShopForm.Locality" class="lb-input-error"></span>
+                </div>
+
+                <!-- City -->
+                <div class="lb-form-group">
+                    <label asp-for="ShopForm.City" class="lb-label"></label>
+                    <input asp-for="ShopForm.City" class="lb-input" placeholder="Navsari" required />
+                    <span asp-validation-for="ShopForm.City" class="lb-input-error"></span>
+                </div>
+            </div>
+
+            <!-- Operating Hours -->
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                <div class="lb-form-group">
+                    <label asp-for="ShopForm.OpeningTime" class="lb-label"></label>
+                    <input asp-for="ShopForm.OpeningTime" type="time" class="lb-input" required />
+                    <span asp-validation-for="ShopForm.OpeningTime" class="lb-input-error"></span>
+                </div>
+
+                <div class="lb-form-group">
+                    <label asp-for="ShopForm.ClosingTime" class="lb-label"></label>
+                    <input asp-for="ShopForm.ClosingTime" type="time" class="lb-input" required />
+                    <span asp-validation-for="ShopForm.ClosingTime" class="lb-input-error"></span>
+                </div>
+
+                <div class="lb-form-group">
+                    <label asp-for="ShopForm.WeeklyOff" class="lb-label"></label>
+                    <select asp-for="ShopForm.WeeklyOff" class="lb-select">
+                        <option value="">No weekly off (Open 7 days)</option>
+                        <option value="Sunday">Sunday</option>
+                        <option value="Monday">Monday</option>
+                        <option value="Tuesday">Tuesday</option>
+                        <option value="Wednesday">Wednesday</option>
+                        <option value="Thursday">Thursday</option>
+                        <option value="Friday">Friday</option>
+                        <option value="Saturday">Saturday</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Coordinates & Location Pinning -->
+            <div style="background:#faf8f3; padding:14px; border-radius:10px; margin-bottom:1.25rem;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <label class="lb-label" style="margin:0;">Shop Coordinates (Optional for precision distance & directions)</label>
+                    <button type="button" id="btn-get-shop-coords" class="lb-btn lb-btn-secondary lb-btn-sm">
+                        📍 Use My Current Location
+                    </button>
+                </div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div>
+                        <input asp-for="ShopForm.Latitude" type="number" step="any" id="shop-latitude" class="lb-input" placeholder="Latitude e.g. 20.9525" />
+                        <span asp-validation-for="ShopForm.Latitude" class="lb-input-error"></span>
+                    </div>
+                    <div>
+                        <input asp-for="ShopForm.Longitude" type="number" step="any" id="shop-longitude" class="lb-input" placeholder="Longitude e.g. 72.9320" />
+                        <span asp-validation-for="ShopForm.Longitude" class="lb-input-error"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Publish Checkbox -->
+            <div class="lb-form-group">
+                <label class="lb-checkbox-label">
+                    <input asp-for="ShopForm.IsPublished" class="lb-checkbox" type="checkbox" />
+                    <span>Publish my shop in customer search results</span>
+                </label>
+            </div>
+
+            <button type="submit" class="lb-btn lb-btn-primary" style="min-height:48px; padding-left:2rem; padding-right:2rem;">
+                @(Model.HasShop ? "Save Shop Changes" : "Create Shop Profile")
+            </button>
+        </form>
+    </div>
+</div>

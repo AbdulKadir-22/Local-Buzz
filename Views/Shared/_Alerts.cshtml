@@ -1,0 +1,29 @@
+@{
+    var success = TempData["SuccessMessage"] as string;
+    var error = TempData["ErrorMessage"] as string;
+    var warning = TempData["WarningMessage"] as string;
+}
+
+@if (!string.IsNullOrEmpty(success))
+{
+    <div class="lb-alert lb-alert-success" role="alert">
+        <span>✓</span>
+        <div>@success</div>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(error))
+{
+    <div class="lb-alert lb-alert-error" role="alert">
+        <span>⚠</span>
+        <div>@error</div>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(warning))
+{
+    <div class="lb-alert lb-alert-warning" role="alert">
+        <span>ℹ</span>
+        <div>@warning</div>
+    </div>
+}

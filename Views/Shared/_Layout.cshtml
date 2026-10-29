@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - LocalBuzz</title>
+    <!-- Inter Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- LocalBuzz CSS -->
+    <link rel="stylesheet" href="~/css/localbuzz.css" asp-append-version="true" />
+</head>
+<body>
+    <header class="lb-header">
+        <div class="lb-container lb-header-content">
+            <a href="/" class="lb-brand">localbuzz</a>
+            <nav class="lb-nav-right">
+                <a href="/Search" class="lb-nav-link">Discover</a>
+
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <a href="/Dashboard" class="lb-nav-link">Dashboard</a>
+                    <a href="/Products" class="lb-nav-link">Products</a>
+                    <form asp-controller="Account" asp-action="Logout" method="post" style="display:inline;">
+                        <button type="submit" class="lb-btn lb-btn-secondary lb-btn-sm" style="min-height:36px;">
+                            Logout
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <a href="/Account/Login" class="lb-nav-btn-shopkeeper">For Shopkeepers</a>
+                }
+            </nav>
+        </div>
+    </header>
+
+    <main class="lb-container" style="padding-top: 1.5rem; padding-bottom: 2rem;">
+        <partial name="_Alerts" />
+        @RenderBody()
+    </main>
+
+    <footer class="lb-footer">
+        <div class="lb-container">
+            LocalBuzz · Discover local shops near you
+        </div>
+    </footer>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

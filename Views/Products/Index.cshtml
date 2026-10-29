@@ -1,0 +1,153 @@
+@using System.Globalization
+@using LocalBuzz.Services
+@model LocalBuzz.ViewModels.ProductListViewModel
+@{
+    ViewData["Title"] = $"Products - {Model.ShopName}";
+    var inCulture = new CultureInfo("en-IN");
+}
+
+<div style="padding-top: 0.5rem;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1.5rem; flex-wrap:wrap; gap:12px;">
+        <div>
+            <h1 style="font-size: 1.75rem; font-weight: 700; margin: 0;">
+                Product Catalogue
+            </h1>
+            <p style="color:var(--lb-muted); margin:0.25rem 0 0 0; font-size:0.95rem;">
+                Manage inventory, pricing, and live availability for <strong>@Model.ShopName</strong>.
+            </p>
+        </div>
+
+        <a href="/Products/Create" class="lb-btn lb-btn-accent">
+            + Add New Product
+        </a>
+    </div>
+
+    <!-- Filter Bar -->
+    <form method="get" class="lb-filter-bar">
+        <div class="lb-filter-item" style="flex:1; min-width:200px;">
+            <input type="text" 
+                   name="q" 
+                   value="@Model.SearchQuery" 
+                   placeholder="Search products by name or brand…" 
+                   class="lb-input" 
+                   style="padding:6px 10px; font-size:0.85rem;" />
+        </div>
+
+        <div class="lb-filter-item">
+            <select name="category" class="lb-select" style="padding:6px 10px; font-size:0.85rem;" onchange="this.form.submit()">
+                <option value="">All Categories</option>
+                @foreach (var cat in CategoryCatalog.Categories)
+                {
+                    <option value="@cat.Name" selected="@(Model.SelectedCategory == cat.Name)">
+                        @cat.Emoji @cat.Name
+                    </option>
+                }
+            </select>
+        </div>
+
+        <button type="submit" class="lb-btn lb-btn-secondary lb-btn-sm" style="min-height:36px;">
+            Filter
+        </button>
+
+        @if (!string.IsNullOrWhiteSpace(Model.SearchQuery) || !string.IsNullOrWhiteSpace(Model.SelectedCategory))
+        {
+            <a href="/Products" class="lb-btn lb-btn-secondary lb-btn-sm" style="min-height:36px;">
+                Reset
+            </a>
+        }
+    </form>
+
+    <!-- Products Table / List -->
+    @if (Model.Products.Count > 0)
+    {
+        <div class="lb-card" style="overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.9rem;">
+                <thead>
+                    <tr style="background:#faf8f3; border-bottom:1px solid var(--lb-hairline);">
+                        <th style="padding:12px 16px;">Product</th>
+                        <th style="padding:12px 16px;">Category</th>
+                        <th style="padding:12px 16px;">Price</th>
+                        <th style="padding:12px 16px;">Status</th>
+                        <th style="padding:12px 16px; text-align:right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model.Products)
+                    {
+                        var priceStr = p.Price.ToString("C0", inCulture);
+                        <tr style="border-bottom:1px solid var(--lb-hairline);">
+                            <td style="padding:12px 16px; vertical-align:middle;">
+                                <div style="display:flex; align-items:center; gap:12px;">
+                                    <div style="width:48px; height:48px; border-radius:8px; overflow:hidden; background:#f6f3eb; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                        @if (!string.IsNullOrWhiteSpace(p.ImagePath))
+                                        {
+                                            <img src="@p.ImagePath" alt="@p.Name" style="width:100%; height:100%; object-fit:cover;" />
+                                        }
+                                        else
+                                        {
+                                            <span style="font-size:1.4rem;">@CategoryCatalog.GetEmoji(p.Category)</span>
+                                        }
+                                    </div>
+                                    <div>
+                                        <div style="font-weight:600; color:var(--lb-ink);">@p.Name</div>
+                                        @if (!string.IsNullOrWhiteSpace(p.Brand))
+                                        {
+                                            <div style="font-size:0.8rem; color:var(--lb-muted);">@p.Brand</div>
+                                        }
+                                    </div>
+                                </div>
+                            </td>
+                            <td style="padding:12px 16px; vertical-align:middle; color:var(--lb-muted);">
+                                @p.Category
+                            </td>
+                            <td style="padding:12px 16px; vertical-align:middle; font-weight:700; color:var(--lb-ink);">
+                                @priceStr
+                            </td>
+                            <td style="padding:12px 16px; vertical-align:middle;">
+                                <form asp-action="Toggle" asp-route-id="@p.Id" method="post" style="display:inline;">
+                                    @if (p.IsAvailable)
+                                    {
+                                        <button type="submit" class="lb-pill lb-pill-instock" style="border:none; cursor:pointer;" title="Click to mark out of stock">
+                                            ✓ In stock
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button type="submit" class="lb-pill lb-pill-outofstock" style="border:none; cursor:pointer;" title="Click to mark in stock">
+                                            ✕ Out of stock
+                                        </button>
+                                    }
+                                </form>
+                            </td>
+                            <td style="padding:12px 16px; vertical-align:middle; text-align:right;">
+                                <div style="display:inline-flex; gap:8px;">
+                                    <a href="/Products/Edit/@p.Id" class="lb-btn lb-btn-secondary lb-btn-sm">
+                                        Edit
+                                    </a>
+                                    <form asp-action="Delete" asp-route-id="@p.Id" method="post" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete \'@p.Name\'?');">
+                                        <button type="submit" class="lb-btn lb-btn-secondary lb-btn-sm" style="color:var(--lb-closed-red);">
+                                            Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="lb-card" style="padding: 3rem 1.5rem; text-align:center;">
+            <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">📦</div>
+            <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem;">No products listed yet</h3>
+            <p style="color:var(--lb-muted); max-width:400px; margin:0 auto 1.5rem auto;">
+                Start building your shop catalogue so customers searching near you can find your items.
+            </p>
+            <a href="/Products/Create" class="lb-btn lb-btn-accent">
+                + Add Your First Product
+            </a>
+        </div>
+    }
+</div>

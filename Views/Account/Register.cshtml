@@ -1,0 +1,51 @@
+@model LocalBuzz.ViewModels.RegisterViewModel
+@{
+    ViewData["Title"] = "Register as Shopkeeper";
+}
+
+<div style="max-width: 460px; margin: 2rem auto;">
+    <div class="lb-card" style="padding: 2rem;">
+        <div class="lb-eyebrow" style="text-align: center;">GROW LOCALLY</div>
+        <h1 style="font-size: 1.6rem; font-weight: 700; text-align: center; margin: 0 0 0.5rem 0;">Create Shopkeeper Account</h1>
+        <p style="text-align: center; color: var(--lb-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+            List your store on LocalBuzz and let nearby customers discover what you have in stock.
+        </p>
+
+        <form asp-controller="Account" asp-action="Register" method="post">
+            <div asp-validation-summary="ModelOnly" class="lb-alert lb-alert-error" style="margin-bottom: 1rem;"></div>
+
+            <div class="lb-form-group">
+                <label asp-for="OwnerName" class="lb-label">Your Full Name</label>
+                <input asp-for="OwnerName" class="lb-input" placeholder="e.g. Ramesh Patel" required />
+                <span asp-validation-for="OwnerName" class="lb-input-error"></span>
+            </div>
+
+            <div class="lb-form-group">
+                <label asp-for="Email" class="lb-label">Business / Personal Email</label>
+                <input asp-for="Email" type="email" class="lb-input" placeholder="e.g. store@localbuzz.in" required />
+                <span asp-validation-for="Email" class="lb-input-error"></span>
+            </div>
+
+            <div class="lb-form-group">
+                <label asp-for="Password" class="lb-label">Password (min 6 characters)</label>
+                <input asp-for="Password" type="password" class="lb-input" placeholder="••••••••" required />
+                <span asp-validation-for="Password" class="lb-input-error"></span>
+            </div>
+
+            <div class="lb-form-group">
+                <label asp-for="ConfirmPassword" class="lb-label">Confirm Password</label>
+                <input asp-for="ConfirmPassword" type="password" class="lb-input" placeholder="••••••••" required />
+                <span asp-validation-for="ConfirmPassword" class="lb-input-error"></span>
+            </div>
+
+            <button type="submit" class="lb-btn lb-btn-accent" style="width: 100%; min-height: 48px; margin-top: 0.5rem;">
+                Create Account & Set Up Shop
+            </button>
+        </form>
+
+        <div style="margin-top: 1.5rem; text-align: center; font-size: 0.9rem; color: var(--lb-muted);">
+            Already have an account? 
+            <a href="/Account/Login" style="color: var(--lb-accent-orange); font-weight: 600;">Sign in here</a>
+        </div>
+    </div>
+</div>

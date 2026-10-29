@@ -1,0 +1,122 @@
+@using LocalBuzz.Services
+@model LocalBuzz.ViewModels.ShopDetailsViewModel
+@{
+    ViewData["Title"] = Model.Shop.Name;
+}
+
+<div>
+    <!-- Owner unpublished warning banner -->
+    @if (!Model.Shop.IsPublished && Model.IsOwner)
+    {
+        <div class="lb-alert lb-alert-warning" style="margin-bottom: 1.5rem;">
+            <span>🔒</span>
+            <div>
+                <strong>Shop preview:</strong> This shop is currently hidden and <strong>not visible to customers</strong>. You can publish it in your <a href="/Dashboard" style="text-decoration:underline; font-weight:600;">Dashboard</a>.
+            </div>
+        </div>
+    }
+
+    <!-- Shop Profile Header Card -->
+    <div class="lb-card" style="padding: 1.5rem; margin-bottom: 2rem;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px;">
+            <div style="flex:1; min-width:280px;">
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                    <h1 style="font-size: clamp(1.5rem, 3vw, 2rem); font-weight:700; margin:0; letter-spacing:-0.02em;">
+                        @Model.Shop.Name
+                    </h1>
+                    @if (Model.IsOpen)
+                    {
+                        <span class="lb-pill lb-pill-open">Open</span>
+                    }
+                    else
+                    {
+                        <span class="lb-pill lb-pill-closed">Closed</span>
+                    }
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(Model.Shop.Description))
+                {
+                    <p style="color:var(--lb-muted); margin-bottom:12px; font-size:0.95rem;">@Model.Shop.Description</p>
+                }
+
+                <div style="display:flex; flex-direction:column; gap:6px; font-size:0.9rem; color:var(--lb-muted);">
+                    <div>
+                        📍 @Model.Shop.Address, @Model.Shop.Locality, @Model.Shop.City
+                        @if (Model.DistanceKm.HasValue)
+                        {
+                            <strong> · @GeoHelper.FormatDistance(Model.DistanceKm.Value) away</strong>
+                        }
+                    </div>
+                    <div>
+                        🕒 @Model.HoursFormatted
+                    </div>
+                    <div>
+                        📞 <a href="tel:@Model.Shop.Phone" style="color:var(--lb-ink); font-weight:600;">@Model.Shop.Phone</a>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <a href="@Model.DirectionsUrl" target="_blank" rel="noopener noreferrer" class="lb-btn lb-btn-accent" style="min-height:48px; padding:0.6rem 1.4rem;">
+                    <partial name="_Icon" model="@("directions")" />
+                    <span>Get Directions</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Catalogue Search & Filter Bar -->
+    <div class="lb-section-header">
+        <h2 class="lb-section-title">Shop Catalogue (@Model.Products.Count items)</h2>
+    </div>
+
+    <form method="get" class="lb-filter-bar">
+        <div class="lb-filter-item" style="flex:1; min-width:200px;">
+            <input type="text" 
+                   name="q" 
+                   value="@Model.Q" 
+                   placeholder="Search in this shop's catalogue…" 
+                   class="lb-input" 
+                   style="padding:6px 10px; font-size:0.85rem;" />
+        </div>
+
+        <div class="lb-filter-item">
+            <select name="category" class="lb-select" style="padding:6px 10px; font-size:0.85rem;" onchange="this.form.submit()">
+                <option value="">All Categories</option>
+                @foreach (var cat in Model.ShopCategories)
+                {
+                    <option value="@cat" selected="@(Model.Category == cat)">@cat</option>
+                }
+            </select>
+        </div>
+
+        <div class="lb-filter-item">
+            <label class="lb-checkbox-label">
+                <input type="checkbox" name="inStockOnly" value="true" class="lb-checkbox" checked="@Model.InStockOnly" onchange="this.form.submit()" />
+                <span>In stock only</span>
+            </label>
+        </div>
+
+        <button type="submit" class="lb-btn lb-btn-secondary lb-btn-sm" style="min-height:36px;">
+            Filter
+        </button>
+    </form>
+
+    <!-- Products Catalogue Grid -->
+    @if (Model.Products.Count > 0)
+    {
+        <div class="lb-product-grid">
+            @foreach (var p in Model.Products)
+            {
+                <partial name="_ProductCard" model="p" />
+            }
+        </div>
+    }
+    else
+    {
+        <div class="lb-card" style="padding: 2.5rem 1rem; text-align: center; margin: 1.5rem 0;">
+            <p style="color: var(--lb-muted); margin-bottom: 0.75rem;">No products found matching your filter criteria in this shop.</p>
+            <a href="/Shops/@Model.Shop.Id" class="lb-btn lb-btn-secondary lb-btn-sm">Show all items in shop</a>
+        </div>
+    }
+</div>

@@ -1,0 +1,40 @@
+@model LocalBuzz.ViewModels.LoginViewModel
+@{
+    ViewData["Title"] = "Shopkeeper Sign In";
+}
+
+<div style="max-width: 440px; margin: 2.5rem auto;">
+    <div class="lb-card" style="padding: 2rem;">
+        <div class="lb-eyebrow" style="text-align: center;">SHOPKEEPER PORTAL</div>
+        <h1 style="font-size: 1.6rem; font-weight: 700; text-align: center; margin: 0 0 0.5rem 0;">Welcome back</h1>
+        <p style="text-align: center; color: var(--lb-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+            Sign in to manage your shop profile and products.
+        </p>
+
+        <form asp-controller="Account" asp-action="Login" method="post">
+            <input type="hidden" asp-for="ReturnUrl" />
+            <div asp-validation-summary="ModelOnly" class="lb-alert lb-alert-error" style="margin-bottom: 1rem;"></div>
+
+            <div class="lb-form-group">
+                <label asp-for="Email" class="lb-label">Email address</label>
+                <input asp-for="Email" type="email" class="lb-input" placeholder="e.g. owner1@localbuzz.in" required />
+                <span asp-validation-for="Email" class="lb-input-error"></span>
+            </div>
+
+            <div class="lb-form-group">
+                <label asp-for="Password" class="lb-label">Password</label>
+                <input asp-for="Password" type="password" class="lb-input" placeholder="••••••••" required />
+                <span asp-validation-for="Password" class="lb-input-error"></span>
+            </div>
+
+            <button type="submit" class="lb-btn lb-btn-primary" style="width: 100%; min-height: 48px; margin-top: 0.5rem;">
+                Sign In
+            </button>
+        </form>
+
+        <div style="margin-top: 1.5rem; text-align: center; font-size: 0.9rem; color: var(--lb-muted);">
+            Don't have a shopkeeper account? 
+            <a href="/Account/Register" style="color: var(--lb-accent-orange); font-weight: 600;">Register here</a>
+        </div>
+    </div>
+</div>

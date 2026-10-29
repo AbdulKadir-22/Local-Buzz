@@ -1,0 +1,13 @@
+@using LocalBuzz.Services
+@model (string? ImagePath, string Category, string ProductName)
+
+@if (!string.IsNullOrWhiteSpace(Model.ImagePath))
+{
+    <img src="@Model.ImagePath" alt="@Model.ProductName" class="lb-card-image" loading="lazy" />
+}
+else
+{
+    <div class="lb-card-placeholder" title="@Model.Category">
+        @CategoryCatalog.GetEmoji(Model.Category)
+    </div>
+}

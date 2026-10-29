@@ -1,0 +1,32 @@
+@model LocalBuzz.ViewModels.ProductFormViewModel
+@{
+    ViewData["Title"] = $"Edit {Model.Name}";
+}
+
+<div style="max-width: 680px; margin: 1.5rem auto;">
+    <div style="margin-bottom: 1.25rem;">
+        <a href="/Products" class="lb-explore-link">← Back to Product List</a>
+    </div>
+
+    <div class="lb-card" style="padding: 2rem;">
+        <h1 style="font-size: 1.5rem; font-weight: 700; margin-top: 0; margin-bottom: 1.5rem;">
+            Edit Product
+        </h1>
+
+        <form asp-action="Edit" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data">
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="ExistingImagePath" />
+
+            <partial name="_ProductForm" model="Model" />
+
+            <div style="display:flex; gap:12px; margin-top:1.5rem;">
+                <button type="submit" class="lb-btn lb-btn-primary" style="min-height:46px; padding-left:1.5rem; padding-right:1.5rem;">
+                    Update Product
+                </button>
+                <a href="/Products" class="lb-btn lb-btn-secondary">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
